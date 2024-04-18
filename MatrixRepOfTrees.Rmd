@@ -1,0 +1,131 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r setup, include=FALSE}
+
+library(extraDistr)
+library(ggplot2)
+library(distr)
+library(rstan)
+
+library(bayesplot)
+library(dplyr)
+library(tidyverse)
+library(bayestestR)
+
+library(phytools)
+library(igraph)
+
+```
+# BayesPhyloTrees
+
+
+## CTMC DNA Model
+```{r}
+adjmat = matrix(c(0,1,
+                  1,0), nrow = 2, ncol = 2)
+adjmat = t(adjmat)
+g = graph_from_adjacency_matrix(adjmatrix = adjmat,
+                                weighted = TRUE)
+plot(g, edge.label=round(E(g)$weight, 2))
+```
+
+```{r}
+m = make_tree(15, children = 6, mode = c("out", "in", "undirected"))
+plot(m)
+```
+
+```{r}
+mu = 0.5
+Q = matrix(c(0,mu/2,
+             mu/2,0), nrow = 2, ncol = 2)
+Q = t(Q)
+g = graph_from_adjacency_matrix(adjmatrix = Q,
+                                weighted = TRUE)
+plot(g, edge.label=round(E(g)$weight, 2))
+```
+
+
+```{r}
+seqs = rbind(c(1,1,1),
+             c(1,1,0),
+             c(1,0,1),
+             c(1,0,0))
+seqs
+dist(seqs)
+```
+
+```{r}
+set.seed(1)
+adjmat = matrix(c(0,0,0,0,
+                  0,0,0,0,
+                  1,1,0,0,
+                  0,0,1,0), nrow = 4, ncol = 4)
+# diag(adjmat) = 0
+adjmat = t(adjmat)
+# adjmat[lower.tri(adjmat, diag = FALSE)] = 0
+adjmat
+g = graph_from_adjacency_matrix(adjmatrix = adjmat,
+                                weighted = TRUE)
+
+format <- function(g) {
+  layout.reingold.tilford(g, root = 4, flip.y = TRUE, circular = FALSE)
+}
+
+plot(g, edge.label=round(E(g)$weight, 2), layout = format)
+```
+
+```{r}
+get_edge_likelihood = function(adjm, edge_start, edge_end){
+  edge_weight = adjm[edge_start, edge_end]
+  if (edge_start == edge_end) {
+    return(1/2 + 1/2 * exp(-edge_weight * mu))
+  } else {
+    return(1/2 - 1/2 * exp(-edge_weight * mu))
+  }
+}
+
+get_tree_likelihood = function(adjm){
+  tree_likelihood = 0
+  for(row in 1:nrow(adjm)){
+    for(col in 1:ncol(adjm)){
+      if(adjm[row, col] != 0){
+        tree_likelihood = get_edge_likelihood(adjm, row, col) + tree_likelihood
+      }
+    }
+  }
+  return(tree_likelihood)
+}
+```
+
+```{r}
+get_tree_likelihood(adjmat)
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+
