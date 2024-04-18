@@ -14,25 +14,24 @@ library(extraDistr)
 ```{r}
 # create a matrix of distances, columns refer to arrangement index and rows refer to a specific node. Each entry in the matrix is the distance b/w the node and the root in that particular arrangement. 
 
-one = c(3, 3, 2, 1)
-two = c(3, 2, 3, 1)
-three = c(2, 3, 3, 1)
-four = c(3, 3, 1, 2)
-five = c(3, 2, 1, 3)
-six = c(2, 3, 1, 3)
-seven = c(3, 2, 3, 1)
-eight = c(2, 1, 3, 3)
-nine = c(1, 3, 3, 2)
-ten = c(1, 3, 2, 3)
-eleven = c(1, 2, 3, 3)
-twelve = c(3, 2, 3, 1)
-thirteen = c(2, 2, 2, 2)
-fourteen = c(2, 2, 2, 2)
-fifteen = c(2, 2, 2, 2)
+o1 = c(0, 3, 3, 2, 1)
+t1 = c(3, 0, 1, 2, 3)
+th1 = c(3, 1, 0, 2, 3)
+f1 = c(2, 2, 2, 0, 2)
+fi1 = c(1, 3, 3, 2, 0)
 
-distance = data.frame(one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen, fifteen)
+distance1 = data.frame(o1, t1, th1, f1, fi1)
 
-# since we are assuming branch independence, some of these arrangements are equivalent - they also don't account for the distances between the leaves so does this make the repeated arrangements redundant? could choose to take into account distances between leaves to account for this, would need to find a new way of storing the trees
+
+o2 = c(0, 2, 2, 2, 2)
+t2 = c(2, 0, 1, 3, 3)
+th2 = c(2, 1, 0, 3, 3)
+f2 = c(2, 3, 3, 0, 1)
+fi2 = c(2, 3, 3, 1, 0)
+
+distance2 = data.frame(o2, t2, th2, f2, fi2)
+
+orders = data.frame(c(2, 3, 4, 5), c(2, 4, 3, 5), c(3, 4, 2, 5), c(2, 3, 5, 4), c(2, 5, 3, 4), c(3, 5, 2, 4), c(2, 4, 5, 3), c(2, 5, 4, 3), c(5, 4, 2, 3), c(3, 4, 5, 2), c(3, 5, 4, 2), c(4, 5, 3, 2), c(2, 3, 4, 5), c(2, 4, 3, 5), c(2, 5, 3, 4))
 
 ```
 
@@ -54,26 +53,57 @@ posterior = function(ppl_function, number_of_iterations) {
 
 p <- function(arrangement, rate, msa) {
   
-  prob = 1
-  for(i in 2:5) {
+  if(arrangement > 12) {
     
-    # this gets the branch length from the tree matrix
-    length = distance[arrangement, i-1]
+    distance = distance2
+    
+  } else {
+    
+    distance = distance1
+    
+  }
+  
+  prob = 1
+  
+  for(i in 2:5) {
+    j = 1
+    while(j < i) {
       
-    for (j in 1:5) {
-      new_char = substring(msa[i], j, j)
-      original_char = substring(msa[1], j, j)
+      length = distance[i, j]
       
-      if(new_char == original_char) {
+      first = msa[orders[i-1, arrangement]]
+      
+      if(j == 1){
+        
+        second = msa[1]
+        
+      } else {
+        
+        second = msa[orders[j-1, arrangement]]
+        
+      }
+
+      
+      for (k in 1:nchar(first)) {
+        
+        new_char = substring(first, k, k)
+        original_char = substring(second, k, k)
+        
+        if(new_char == original_char) {
         
         # if char hasn't changed, use 1 - rate
         prob = prob * 1/2 * (1-exp(-2*(1-rate)*length))
         
-      } else {
+        } else {
         prob = prob * 1/2 * (1-exp(-2*rate*length))
+        }
+        
       }
       
+      j = j+1
+      
     }
+    
   }
   
   return(prob)
@@ -92,17 +122,18 @@ simulate <- function(distribution) {
 # Use observe(realization, distribution) for observed random variables
 observe = function(arrangement, rate, msa) {
   # `<<-` lets us modify variables that live in the global scope from inside a function
-  weight <<- weight * p(distribution, realization, msa) 
+  weight <<- weight * p(arrangement, rate, msa) 
 }
 
 
 ```
 
 ```{r}
+msa = c("11", "10", "00", "01", "11")
 
 tree = function() {
   
-  arrangement = rdunif(1, 1, 15)
+  arrangement = as.numeric(rdunif(1, 1, 15))
   rate = simulate(Unif(0, 1))
   observe(arrangement, rate, msa)
   
