@@ -1,0 +1,92 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r setup, include=FALSE}
+
+library(extraDistr)
+library(ggplot2)
+library(distr)
+library(rstan)
+
+library(bayesplot)
+library(dplyr)
+library(tidyverse)
+library(bayestestR)
+
+library(phytools)
+library(igraph)
+
+```
+
+# Not used
+```{r}
+setClass("Node", 
+         slots = list(left_child = "ANY",
+                      right_child = "ANY",
+                      left_weight = "numeric",
+                      right_weight = "numeric",
+                      data = "ANY"
+                      )
+         )
+
+setGeneric("insertNode",
+           function(parent, data, weight) standardGeneric("insertNode"))
+
+setMethod("insertNode", 
+          signature(parent, data, weight), 
+          definition = function(parent, data, weight){
+            new_node = Node(left_child = NULL,
+                            right_child = NULL,
+                            left_weight = weight,
+                            right_weight = NULL,
+                            data = data
+                            )
+            if (!parent.left_child) {
+              parent.left_child = new_node
+            } else if (!parent.right_child) {
+              parent.right_child = new_node
+            } else {
+              return("Error")
+            }
+            return(parent)
+          })
+
+
+
+
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
